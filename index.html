@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Lost & Found Portal</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f4f6f9;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .search-box {
+      margin-top: 30px;
+    }
+
+    .card {
+      background: #f8f8f8;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border-left: 5px solid #007bff;
+    }
+
+    .status {
+      font-weight: bold;
+      color: green;
+    }
+
+    .match {
+      color: red;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Campus Lost & Found Portal</h1>
+
+  <div class="container">
+
+    <h2>Report Lost / Found Item</h2>
+
+    <div class="form-group">
+      <label>Item Name</label>
+      <input type="text" id="itemName">
+    </div>
+
+    <div class="form-group">
+      <label>Category</label>
+      <input type="text" id="category" placeholder="Bag, Wallet, Bottle...">
+    </div>
+
+    <div class="form-group">
+      <label>Color</label>
+      <input type="text" id="color">
+    </div>
+
+    <div class="form-group">
+      <label>Location</label>
+      <input type="text" id="location">
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Status</label>
+      <select id="status">
+        <option value="Lost">Lost</option>
+        <option value="Found">Found</option>
+      </select>
+    </div>
+
+    <button onclick="addItem()">Submit Item</button>
+
+
+    <div class="search-box">
+      <h2>Search Items</h2>
+
+      <input type="text" id="searchInput" placeholder="Search by keyword">
+
+      <button onclick="searchItems()">Search</button>
+    </div>
+
+
+    <div id="results"></div>
+
+  </div>
+
+
+  <script>
+
+    let items = JSON.parse(localStorage.getItem("items")) || [];
+
+
+    function addItem() {
+
+      const item = {
+        name: document.getElementById("itemName").value,
+        category: document.getElementById("category").value,
+        color: document.getElementById("color").value,
+        location: document.getElementById("location").value,
+        description: document.getElementById("description").value,
+        status: document.getElementById("status").value
+      };
+
+
+      items.push(item);
+
+      localStorage.setItem("items", JSON.stringify(items));
+
+      alert("Item Submitted Successfully");
+
+      clearForm();
+
+      displayItems(items);
+    }
+
+
+    function clearForm() {
+      document.getElementById("itemName").value = "";
+      document.getElementById("category").value = "";
+      document.getElementById("color").value = "";
+      document.getElementById("location").value = "";
+      document.getElementById("description").value = "";
+    }
+
+
+    function displayItems(data) {
+
+      const results = document.getElementById("results");
+
+      results.innerHTML = "";
+
+      data.forEach((item, index) => {
+
+        let possibleMatch = false;
+
+        items.forEach(otherItem => {
+
+          if (
+            item !== otherItem &&
+            item.category.toLowerCase() === otherItem.category.toLowerCase() &&
+            item.color.toLowerCase() === otherItem.color.toLowerCase() &&
+            item.status !== otherItem.status
+          ) {
+            possibleMatch = true;
+          }
+        });
+
+
+        results.innerHTML += `
+          <div class="card">
+            <h3>${item.name}</h3>
+
+            <p><b>Category:</b> ${item.category}</p>
+            <p><b>Color:</b> ${item.color}</p>
+            <p><b>Location:</b> ${item.location}</p>
+            <p><b>Description:</b> ${item.description}</p>
+            <p class="status">${item.status}</p>
+
+            ${possibleMatch ? '<p class="match">Possible Match Found!</p>' : ''}
+          </div>
+        `;
+      });
+    }
+
+
+    function searchItems() {
+
+      const keyword = document.getElementById("searchInput").value.toLowerCase();
+
+      const filtered = items.filter(item =>
+        item.name.toLowerCase().includes(keyword) ||
+        item.category.toLowerCase().includes(keyword) ||
+        item.color.toLowerCase().includes(keyword) ||
+        item.description.toLowerCase().includes(keyword)
+      );
+
+      displayItems(filtered);
+    }
+
+
+    displayItems(items);
+
+  </script>
+
+</body>
+</html>
